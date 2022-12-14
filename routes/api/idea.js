@@ -163,9 +163,10 @@ router.post('/completeIdea', auth, async (req, res) => {
 // create the new idea
 router.post('/', auth, async (req, res) => {
     try {
-        const { title, content } = req.body;
+        const { title, content, category } = req.body;
         const newIdea = new Idea({
             user: req.user.id,
+            category,
             title,
             content
         });

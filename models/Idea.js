@@ -5,6 +5,11 @@ const ProfileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'xfs_user',
   },
+  category: {
+    type: Number, 
+    required: true, 
+    default: 1
+  },
   title: {
     type: String,
     required: true
