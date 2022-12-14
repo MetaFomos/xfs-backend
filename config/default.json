@@ -1,0 +1,5 @@
+{
+    "LocalmongoURI": "mongodb://localhost:27017/xfs-mongo",
+    "mongoURI": "mongodb+srv://Gabe:r!!_pvA.AkM6p4Q@cluster0.urnaa.mongodb.net/scan-booth?retryWrites=true&w=majority",
+    "jwtSecret": "secret"
+}
