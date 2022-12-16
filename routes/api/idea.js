@@ -56,6 +56,19 @@ router.post('/approveIdea', async (req, res) => {
   }
 })
 
+// Reject the ideas
+router.post('/rejectIdea', async (req, res) => {
+  try {
+    const { ideaId } = req.body;
+    let idea = await Idea.findOneAndRemove({ _id: ideaId })
+    const ideas = await Idea.find({ status: 0 }).populate('user', ['name', 'github']);
+    res.json(ideas);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("Server error");
+  }
+})
+
 // propose the ideas
 router.post('/proposeIdea', async (req, res) => {
   try {
