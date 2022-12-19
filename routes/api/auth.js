@@ -167,6 +167,61 @@ async function verifyInGoogle(token) {
 }
 
 router.post(
+  "/sm-login",
+  check("accessToken", "Please include a valid token").exists(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { accessToken } = req.body;
+    const { email } = req.body.profileObj;
+    try {
+      let user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(400).json({ errors: [{ msg: "User not found." }] });
+      }
+
+      let OAuth2UserId;
+      if (user.register_type == "GOOGLE") {
+        const tokenId = req.body.tokenObj.id_token;
+        verifiedToken = await verifyInGoogle(tokenId).catch(console.error);
+        OAuth2UserId = verifiedToken.sub;
+
+        if (OAuth2UserId != user.google_auth_user_id) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "User not registred." }] });
+        }
+      } 
+
+      const payload = {
+        user: {
+          id: user._id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        config.get("jwtSecret"),
+        { expiresIn: 7200 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
+
+      console.log("___ User login: " + user.email);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+router.post(
   "/sm-signup",
   check("register_type", "Please include a valid signup type").exists(),
   async (req, res) => {
