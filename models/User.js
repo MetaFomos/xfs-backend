@@ -21,6 +21,17 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 2
   },
+  register_type: {
+    type: String,
+    default: 'NORMAL_SIGNUP'
+  },
+  google_auth_user_id: { 
+    type: String 
+  },
+  avatar: { 
+    type: String, 
+    default: 'defaultUser.png'
+  },  
   date: {
     type: Date,
     default: Date.now
