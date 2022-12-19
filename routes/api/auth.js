@@ -158,7 +158,7 @@ async function verifyInGoogle(token) {
   const ticket = await glClient.verifyIdToken({
     idToken: token,
     audience:
-      "860538264827-8qf2qpp6mqki8asmbpsroulb9u16un61.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+      "255335071356-qqfb9le0dio476c0mib60o1lkhfl0dce.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
   });
   const payload = ticket.getPayload();
   return payload;
