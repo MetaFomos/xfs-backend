@@ -7,6 +7,8 @@ const normalize = require("normalize-url");
 const gravatar = require("gravatar");
 const config = require('config');
 const { check, validationResult } = require('express-validator');
+const axios = require('axios');
+var qs = require('qs');
 
 const User = require('../../models/User');
 
@@ -255,7 +257,6 @@ router.post(
           .json({ errors: [{ msg: "User already exists" }] });
       }
 
-      const avatar = normalize(picture, { forceHttps: true });
       const firstname = name.split(" ")[0] || null;
       const lastname = name.split(" ")[1] || null;
 
@@ -264,6 +265,7 @@ router.post(
         name: firstname + ' ' + lastname,
         register_type,
         google_auth_user_id,
+        avatar: picture
       });
 
       await user.save();
@@ -290,5 +292,156 @@ router.post(
     }
   }
 );
+
+router.post('/githubAuth_signup', async (req, res) => {
+  const { code } = req.body;
+  
+  axios({
+    method: 'post',
+    url: 'https://github.com/login/oauth/access_token',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data : qs.stringify({
+      'client_id': config.get('gitClientId'),
+      'client_secret': config.get('gitClientSecret'),
+      'code': code,
+      'redirect_uri': config.get('gitRedirectUrl') 
+    })
+  })
+  .then(function (response) {
+    let params = new URLSearchParams(response.data);
+    const access_token = params.get("access_token");
+
+    axios({
+      method: 'get',
+      url: 'https://api.github.com/user',
+      headers: { 
+        'Authorization': 'Bearer '+access_token
+      }
+    })
+      .then(async function (response_user) {
+        var github_user_data = response_user.data;
+        var githubUserName = github_user_data['login'];
+        var githubUserAvatar = github_user_data['avatar_url'];
+        // check sigh in or sign up
+        let user = await User.findOne({ github: githubUserName });
+
+        if (user) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "User already exists" }] });
+        }
+
+        user = new User({
+          github: githubUserName,
+          register_type: 'Gitbub',
+          avatar: githubUserAvatar
+        });
+
+        await user.save();
+        console.log("__New User added." + Date("Y-m-d"));
+
+        const payload = {
+          user: {
+            id: user._id,
+          },
+        };
+
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: 7200 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token });
+          }
+        );
+      })
+      .catch(function (error) {
+        // console.log(error);
+        return res
+          .status(400)
+          .json({ errors: [{ msg: "Github login failed" }] });
+      });
+  })
+  .catch(function (error) {
+    // console.log(error);
+    return res
+          .status(400)
+          .json({ errors: [{ msg: "Github login failed" }] });
+  });
+})
+
+router.post('/githubAuth_signin', async (req, res) => {
+  const { code } = req.body;
+  
+  axios({
+    method: 'post',
+    url: 'https://github.com/login/oauth/access_token',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data : qs.stringify({
+      'client_id': config.get('gitClientId'),
+      'client_secret': config.get('gitClientSecret'),
+      'code': code,
+      'redirect_uri': config.get('gitRedirectUrl') 
+    })
+  })
+  .then(function (response) {
+    let params = new URLSearchParams(response.data);
+    const access_token = params.get("access_token");
+
+    axios({
+      method: 'get',
+      url: 'https://api.github.com/user',
+      headers: { 
+        'Authorization': 'Bearer '+access_token
+      }
+    })
+      .then(async function (response_user) {
+        var github_user_data = response_user.data;
+        var githubUserName = github_user_data['login'];
+        var githubUserAvatar = github_user_data['avatar_url'];
+        // check sigh in or sign up
+        let user = await User.findOne({ github: githubUserName });
+
+        if (!user) {
+          return res.status(400).json({ errors: [{ msg: "User not found." }] });
+        }
+
+        const payload = {
+          user: {
+            id: user._id,
+          },
+        };
+
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: 7200 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token });
+          }
+        );
+
+        console.log("___ User login: " + user.github);
+      })
+      .catch(function (error) {
+        // console.log(error);
+        return res
+          .status(400)
+          .json({ errors: [{ msg: "Github login failed" }] });
+      });
+  })
+  .catch(function (error) {
+    // console.log(error);
+    return res
+          .status(400)
+          .json({ errors: [{ msg: "Github login failed" }] });
+  });
+})
 
 module.exports = router;

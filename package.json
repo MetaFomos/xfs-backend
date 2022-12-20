@@ -13,7 +13,7 @@
   "author": "Wolf",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.0",
+    "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "client": "file:client",
     "config": "^3.3.3",
@@ -23,7 +23,8 @@
     "gravatar": "^1.8.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.8",
-    "normalize-url": "^5.3.0"
+    "normalize-url": "^5.3.0",
+    "qs": "^6.11.0"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
