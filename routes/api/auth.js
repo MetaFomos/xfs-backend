@@ -18,9 +18,14 @@ const glClient = new OAuth2Client(
   "255335071356-qqfb9le0dio476c0mib60o1lkhfl0dce.apps.googleusercontent.com"
 );
 
+router.get('/test', async (req, res) => {
+  res.json({ msg: 'success' });
+});
+
 // @route    GET api/auth
 // @desc     Get user by token
 // @access   Private
+
 router.get('/', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
