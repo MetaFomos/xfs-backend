@@ -36,6 +36,41 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+router.post('/editProfile', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const { userName, gitName, email } = req.body;
+    user.name = userName;
+    user.email = email;
+    user.github = gitName;
+    user.save();
+    res.status(200).send({ msg: 'success' });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send('Server Error');
+  }
+})
+
+router.post('/changePassword', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const { curPassword, resetPassword } = req.body;
+    if (await bcrypt.hash(curPassword, user.salt) == user.password) {
+      const salt = await bcrypt.genSalt(10);
+      user.salt = salt;
+      user.password = await bcrypt.hash(resetPassword, salt);
+      user.save();
+      res.status(200).send({ msg: 'success' });
+    } else {
+      res.status(500).send('Current password incorrect');
+    }
+    user.password = await bcrypt.hash(resetPassword, salt);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send('Server Error');
+  }
+})
+
 router.post(
   "/login",
   check("email", "Please include a valid email").isEmail(),
@@ -131,7 +166,8 @@ router.post(
       });
 
       const salt = await bcrypt.genSalt(10);
-
+      
+      user.salt = salt;
       user.password = await bcrypt.hash(password, salt);
 
       await user.save();
