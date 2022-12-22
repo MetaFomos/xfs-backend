@@ -64,7 +64,6 @@ router.post('/changePassword', auth, async (req, res) => {
     } else {
       res.status(500).send('Current password incorrect');
     }
-    user.password = await bcrypt.hash(resetPassword, salt);
   } catch (err) {
     console.log(err.message);
     res.status(500).send('Server Error');
