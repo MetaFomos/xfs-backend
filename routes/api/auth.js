@@ -352,6 +352,7 @@ router.post('/githubAuth_signup', async (req, res) => {
   .then(function (response) {
     let params = new URLSearchParams(response.data);
     const access_token = params.get("access_token");
+    console.log(params, access_token);
 
     axios({
       method: 'get',
@@ -361,9 +362,11 @@ router.post('/githubAuth_signup', async (req, res) => {
       }
     })
       .then(async function (response_user) {
+        // console.log(response_user);
         var github_user_data = response_user.data;
         var githubUserName = github_user_data['login'];
         var githubUserAvatar = github_user_data['avatar_url'];
+        console.log(githubUserName, githubUserAvatar);
         // check sigh in or sign up
         let user = await User.findOne({ github: githubUserName });
 
@@ -399,7 +402,7 @@ router.post('/githubAuth_signup', async (req, res) => {
         );
       })
       .catch(function (error) {
-        // console.log(error);
+        console.log(error);
         return res
           .status(400)
           .json({ errors: [{ msg: "Github login failed" }] });

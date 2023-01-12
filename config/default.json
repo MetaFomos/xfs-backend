@@ -4,5 +4,5 @@
     "jwtSecret": "secret",
     "gitClientId": "db84e790d9f940d5dd2e",
     "gitClientSecret": "fabb3ae2eec0b3cc0eda86fdda1ec7d8eaeb9b47",
-    "gitRedirectUrl": "http://localhost:3000/githubauth"
+    "gitRedirectUrl": "https://ox-explorer.com/githubauth"
 }
