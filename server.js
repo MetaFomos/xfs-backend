@@ -1,5 +1,6 @@
 const express = require('express');
 const connectDB = require('./config/db');
+const fileUpload = require('express-fileupload');
 const path = require('path');
 
 const app = express();
@@ -9,7 +10,7 @@ connectDB();
 
 // Init Middleware
 app.use(express.json());
-
+app.use(fileUpload());
 // Define Routes
 // app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));

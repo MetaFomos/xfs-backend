@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const normalize = require("normalize-url");
 const gravatar = require("gravatar");
 const config = require('config');
+const md5 = require('md5');
 const { check, validationResult } = require('express-validator');
 const axios = require('axios');
 var qs = require('qs');
@@ -38,12 +39,47 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/editProfile', auth, async (req, res) => {
   try {
+    console.log(req.files);
     const user = await User.findById(req.user.id);
+    if(req.files) {
+      var files = [].concat(req.files['files[]']);
+      for(var i = 0; i < files.length; i++){
+        var file = files[i];
+        // file.name = file.name.replace(/\s/g, '');
+        //hash image name
+        let tempHashName = md5(Date.now());
+        //hash image name end
+        //file extension
+        let tempFileExt = file.name.substring(file.name.lastIndexOf('.')+1, file.name.length) || file.name;
+        //file extension end
+  
+        console.log(tempFileExt);
+  
+        try {
+          // if(dashboard.partnership_img[updatedIndex].hash_name) {
+          //   // await fs.unlinkSync(`D:/work/2022.10.6 (Legends)/legends-frontend/src/assets/images/upload/${dashboard.dashboard_img}`);
+          //   await fs.unlinkSync(`D:/work/2022.10.6 (Legends)/legends-frontend/src/assets/images/upload/${dashboard.partnership_img[updatedIndex].hash_name}`);
+          // }
+          
+          user.avatar = tempHashName+'.'+tempFileExt;
+        } catch (err) {
+          console.error(err.message);
+          res.status(500).send('Server Error');
+        }
+  
+        file.mv(`../xfs-frontend/public/assets/img/./${tempHashName}.${tempFileExt}`, err => {
+          if(err) {
+            console.error(err);
+            return res.status(500).send(err);
+          }
+        });
+      }
+    }
     const { userName, gitName, email } = req.body;
     user.name = userName;
     user.email = email;
     user.github = gitName;
-    user.save();
+    await user.save();
     res.status(200).send({ msg: 'success' });
   } catch (err) {
     console.log(err.message);
@@ -486,5 +522,35 @@ router.post('/githubAuth_signin', async (req, res) => {
           .json({ errors: [{ msg: "Github login failed" }] });
   });
 })
+
+
+router.post('/avatarImgSaveAction', async (req, res) => {
+  try {
+    var files = [].concat(req.files['files[]']);
+    for(var i = 0; i < files.length; i++){
+      var file = files[i];
+      // file.name = file.name.replace(/\s/g, '');
+      //hash image name
+      let tempHashName = md5(Date.now());
+      //hash image name end
+      //file extension
+      let tempFileExt = file.name.substring(file.name.lastIndexOf('.')+1, file.name.length) || file.name;
+      //file extension end
+
+      console.log(tempFileExt);
+
+      file.mv('../legends-frontend/src/assets/images/upload/./main_background.jpg', err => {
+        if(err) {
+          console.error(err);
+          return res.status(500).send(err);
+        }
+      });
+    }
+    res.json({ status: true });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 module.exports = router;

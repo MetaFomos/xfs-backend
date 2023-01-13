@@ -17,10 +17,12 @@
     "client": "file:client",
     "config": "^3.3.3",
     "express": "^4.17.1",
+    "express-fileupload": "^1.4.0",
     "express-validator": "^6.8.1",
     "google-auth-library": "^8.7.0",
     "gravatar": "^1.8.1",
     "jsonwebtoken": "^8.5.1",
+    "md5": "^2.3.0",
     "mongoose": "^5.11.8",
     "normalize-url": "^5.3.0",
     "qs": "^6.11.0"
