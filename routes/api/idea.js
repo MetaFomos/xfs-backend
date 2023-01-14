@@ -41,10 +41,10 @@ router.post('/getIdea', auth, async (req, res) => {
 // approve the ideas
 router.post('/approveIdea', async (req, res) => {
   try {
-    const { ideaID, wallet, budget, milestone } = req.body;
+    const { wallet, ideaID } = req.body;
     let idea = await Idea.findOneAndUpdate(
       { _id: ideaID },
-      { $set: { wallet, budget, milestone, status: 1 } },
+      { $set: { wallet, status: 1 } },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     )
 
@@ -176,13 +176,21 @@ router.post('/completeIdea', auth, async (req, res) => {
 // create the new idea
 router.post('/', auth, async (req, res) => {
     try {
-        const { title, content, category } = req.body;
+        const { title, content, category, data } = req.body;
         const newIdea = new Idea({
             user: req.user.id,
             category,
             title,
-            content
+            content,
+            budget: data.budget,
+            milestone: data.milestone
         });
+        // const { ideaID, wallet, budget, milestone } = req.body;
+        // let idea = await Idea.findOneAndUpdate(
+        //   { _id: ideaID },
+        //   { $set: { wallet, budget, milestone, status: 1 } },
+        //   { new: true, upsert: true, setDefaultsOnInsert: true }
+        // )
         const idea = await newIdea.save();
         res.json(idea);
     } catch (err) {
